@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  createdAt DateTime @default(now())
+
+  orders        Order[]
+  refundRequests RefundRequest[]
+}
+
+model Order {
+  id            String   @id
+  customerId    String
+  amount        Float
+  status        String
+  orderDate     DateTime
+  deliveryDate  DateTime?
+  productName   String
+  isFinalSale   Boolean  @default(false)
+  isDigital     Boolean  @default(false)
+  isDownloaded  Boolean  @default(false)
+
+  customer       Customer        @relation(fields: [customerId], references: [id])
+  refundRequests RefundRequest[]
+}
+
+model RefundRequest {
+  id          String   @id @default(cuid())
+  customerId  String
+  orderId     String
+  reason      String
+  status      String
+  decision    String?
+  createdAt   DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id])
+  order    Order    @relation(fields: [orderId], references: [id])
+}
+
+model AgentLog {
+  id        String   @id @default(cuid())
+  sessionId String
+  type      String
+  tool      String?
+  input     String?
+  output    String?
+  createdAt DateTime @default(now())
+}
